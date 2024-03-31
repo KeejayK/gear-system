@@ -2,12 +2,6 @@
 
 A Spring Boot application for outdoor clubs (like the Climbing Club at UW) that loan gear. Allows officers to verify members when they join and check out gear to verified members.
 
-TODO:
-    - api documentation
-    - testing controllers
-    - implement security config for user auth
-    - validation and exception handling
-    - email notifications when gear is overdue
 
 ### Features
 
@@ -70,3 +64,7 @@ Add new gear: POST /api/gear
 Check out gear: POST /api/checkout
 Return gear: POST /api/checkout/return/{id}
 ```
+
+### TODO:
+- implement security config for user auth
+- email notifications when gear is overdue
