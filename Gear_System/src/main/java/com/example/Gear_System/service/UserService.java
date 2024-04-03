@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import com.example.Gear_System.model.User;
 import com.example.Gear_System.repository.UserRepository;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 @Service
 public class UserService {
 
@@ -27,7 +30,6 @@ public class UserService {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalStateException("Email already in use.");
         }
-        // Encrypt password NOTE FOR FUTURE KEEJAY: CHECK THAT THIS WORKS 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setOfficer(false);
         user.setVerified(false);
@@ -36,20 +38,39 @@ public class UserService {
 
     // Verify user by email
     public boolean verifyUserByEmail(String email) {
-        // Must update this so only officers may do this
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            user.setVerified(true);
-            userRepository.save(user);
-            return true;
+        if (!isCurrentUserOfficer()) {
+            throw new IllegalStateException("Only officers can verify users.");
         }
-        return false;
+
+        User user = userRepository.findByEmail(email)
+                   .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        if (user.isVerified()) {
+            throw new IllegalStateException("User is already verified.");
+        }
+
+        user.setVerified(true);
+        userRepository.save(user);
+        return true;
+    }
+
+    private boolean isCurrentUserOfficer() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+               .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_OFFICER"));
     }
 
     // Find user by email
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public Boolean authenticateUser(String email, String password) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())) {
+            return true;
+        }
+        return false;
     }
 
 
