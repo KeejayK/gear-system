@@ -47,10 +47,6 @@ Build the project using Gradle:
 ./gradlew bootRun
 ```
 
-Run the application:
-```
-java -jar target/gear-checkout-system-0.0.1-SNAPSHOT.jar
-```
 
 ### Usage
 
@@ -66,5 +62,5 @@ Return gear: POST /api/checkout/return/{id}
 ```
 
 ### TODO:
-- implement security config for user auth
 - email notifications when gear is overdue
+- more integration testing
